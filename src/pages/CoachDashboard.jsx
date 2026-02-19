@@ -40,10 +40,13 @@ function CoachDashboard({
   const { language } = useLanguage();
   const t = labels[language] || labels.en;
   const swimmers = useMemo(() => users.filter((user) => user.role === 'swimmer'), [users]);
-  const usersByEmail = useMemo(
-    () => users.reduce((acc, user) => ({ ...acc, [user.email]: user }), {}),
-    [users],
-  );
+  const usersByEmail = useMemo(() => {
+    const map = {};
+    users.forEach((user) => {
+      map[user.email] = user;
+    });
+    return map;
+  }, [users]);
   const qualifiedTimes = useMemo(() => times.filter((entry) => entry.achievedReference), [times]);
   const [selectedSwimmer, setSelectedSwimmer] = useState('');
   const [text, setText] = useState('');
@@ -98,7 +101,7 @@ function CoachDashboard({
   const selectedSwimmerPredictions = useMemo(() => {
     if (!selectedSwimmer) return [];
     return getPredictionsForSwimmer(selectedSwimmer);
-  }, [selectedSwimmer, getPredictionsForSwimmer, times]);
+  }, [selectedSwimmer, getPredictionsForSwimmer]);
 
   const recentAttendance = useMemo(() => attendanceRecords.slice(0, 12), [attendanceRecords]);
 

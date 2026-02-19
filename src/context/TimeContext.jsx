@@ -14,6 +14,10 @@ function parseTimeToMs(timeValue) {
   const seconds = Number(match[2]);
   const centiseconds = Number((match[3] ?? '0').padEnd(2, '0'));
 
+  if (Number.isNaN(minutes) || Number.isNaN(seconds) || Number.isNaN(centiseconds) || seconds > 59) {
+    return null;
+  }
+
   return minutes * 60_000 + seconds * 1_000 + centiseconds * 10;
 }
 
@@ -66,13 +70,10 @@ function calculateLinearPrediction(entries) {
 }
 
 export function TimeProvider({ children }) {
-  const [times, setTimes] = useState([]);
+  const [times, setTimes] = useState(() => readStoredJson(TIMES_KEY, []));
   const [messages, setMessages] = useState(() => readStoredJson(MESSAGES_KEY, []));
   const [alerts, setAlerts] = useState(() => readStoredJson(ALERTS_KEY, []));
 
-  useEffect(() => {
-    setTimes(readStoredJson(TIMES_KEY, []));
-  }, []);
 
   useEffect(() => {
     localStorage.setItem(TIMES_KEY, JSON.stringify(times));
@@ -110,12 +111,14 @@ export function TimeProvider({ children }) {
       achievedReference,
     };
 
-    const previousBest = times
-      .filter(
-        (item) =>
-          item.swimmerEmail === currentUser.email && item.style === style && item.distance === distance,
-      )
-      .sort((a, b) => a.timeInMs - b.timeInMs)[0];
+    const previousBest = times.reduce((best, item) => {
+      const isSameEvent =
+        item.swimmerEmail === currentUser.email && item.style === style && item.distance === distance;
+
+      if (!isSameEvent) return best;
+      if (!best || item.timeInMs < best.timeInMs) return item;
+      return best;
+    }, null);
 
     if (previousBest && timeInMs < previousBest.timeInMs) {
       const improvementMs = previousBest.timeInMs - timeInMs;
