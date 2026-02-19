@@ -5,7 +5,25 @@ import FiftyRankingTab from '../components/FiftyRankingTab';
 import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
 import SectionTitle from '../components/SectionTitle';
+import LanguageToggle from '../components/LanguageToggle';
+import { useLanguage } from '../context/LanguageContext';
 import { buildMeetManagerCsv, downloadCsvFile } from '../utils/exportMeetManager';
+
+
+const labels = {
+  en: {
+    panelTitle: 'Internal Coaching Panel',
+    dashboard: 'Coach Dashboard',
+    panelTab: 'Panel',
+    logout: 'Logout',
+  },
+  es: {
+    panelTitle: 'Panel interno del entrenador',
+    dashboard: 'Panel de coach',
+    panelTab: 'Panel',
+    logout: 'Cerrar sesión',
+  },
+};
 
 function CoachDashboard({
   currentUser,
@@ -19,6 +37,8 @@ function CoachDashboard({
   onLogout,
 }) {
   const [activeTab, setActiveTab] = useState('panel');
+  const { language } = useLanguage();
+  const t = labels[language] || labels.en;
   const swimmers = useMemo(() => users.filter((user) => user.role === 'swimmer'), [users]);
   const usersByEmail = useMemo(
     () => users.reduce((acc, user) => ({ ...acc, [user.email]: user }), {}),
@@ -140,13 +160,16 @@ function CoachDashboard({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
             <CaimanesLogo size={76} />
             <div>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>Internal Coaching Panel</p>
-              <h2 style={{ margin: '0.25rem 0 0', fontSize: '1.1rem' }}>Coach Dashboard</h2>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>{t.panelTitle}</p>
+              <h2 style={{ margin: '0.25rem 0 0', fontSize: '1.1rem' }}>{t.dashboard}</h2>
             </div>
           </div>
-          <SecondaryButton onClick={onLogout} style={{ width: 'auto', padding: '0.55rem 0.9rem' }}>
-            Logout
-          </SecondaryButton>
+          <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+            <LanguageToggle />
+            <SecondaryButton onClick={onLogout} style={{ width: 'auto', padding: '0.55rem 0.9rem' }}>
+              {t.logout}
+            </SecondaryButton>
+          </div>
         </div>
       </Card>
 
@@ -156,7 +179,7 @@ function CoachDashboard({
             onClick={() => setActiveTab('panel')}
             style={activeTab === 'panel' ? { borderColor: '#1d4ed8', color: '#1d4ed8', backgroundColor: '#eff6ff' } : {}}
           >
-            Panel
+            {t.panelTab}
           </SecondaryButton>
           <SecondaryButton
             onClick={() => setActiveTab('ranking50')}

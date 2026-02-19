@@ -73,6 +73,7 @@ function App() {
             times={times}
             messages={messages}
             sendMessage={sendMessage}
+            getPredictionsForSwimmer={getPredictionsForSwimmer}
             attendanceRecords={attendanceRecords}
             addAttendance={addAttendance}
             onLogout={handleLogout}

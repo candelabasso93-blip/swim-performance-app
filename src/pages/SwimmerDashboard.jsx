@@ -7,9 +7,27 @@ import PerformanceChart from '../components/PerformanceChart';
 import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
 import SectionTitle from '../components/SectionTitle';
+import LanguageToggle from '../components/LanguageToggle';
+import { useLanguage } from '../context/LanguageContext';
 
 const styles = ['LIBRE', 'ESPALDA', 'PECHO', 'MARIPOSA'];
 const distances = ['50', '100', '200'];
+
+
+const labels = {
+  en: {
+    profile: 'Swimmer Profile',
+    logout: 'Logout',
+    myPanel: 'My panel',
+    feedbackSaved: 'Time saved successfully.',
+  },
+  es: {
+    profile: 'Perfil del nadador',
+    logout: 'Cerrar sesión',
+    myPanel: 'Mi panel',
+    feedbackSaved: 'Marca guardada correctamente.',
+  },
+};
 
 function SwimmerDashboard({
   currentUser,
@@ -32,6 +50,8 @@ function SwimmerDashboard({
   });
   const [feedback, setFeedback] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  const { language } = useLanguage();
+  const t = labels[language] || labels.en;
 
   const swimmerTimes = useMemo(
     () =>
@@ -97,7 +117,7 @@ function SwimmerDashboard({
       return;
     }
 
-    setFeedback('Time saved successfully.');
+    setFeedback(t.feedbackSaved);
     setForm((prev) => ({ ...prev, time: '' }));
   };
 
@@ -108,13 +128,16 @@ function SwimmerDashboard({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
             <CaimanesLogo size={76} />
             <div>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>Swimmer Profile</p>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>{t.profile}</p>
               <h2 style={{ margin: '0.25rem 0 0', fontSize: '1.1rem', wordBreak: 'break-word' }}>{currentUser.email}</h2>
             </div>
           </div>
-          <SecondaryButton onClick={onLogout} style={{ width: 'auto', padding: '0.55rem 0.9rem' }}>
-            Logout
-          </SecondaryButton>
+          <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+            <LanguageToggle />
+            <SecondaryButton onClick={onLogout} style={{ width: 'auto', padding: '0.55rem 0.9rem' }}>
+              {t.logout}
+            </SecondaryButton>
+          </div>
         </div>
       </Card>
 
@@ -124,7 +147,7 @@ function SwimmerDashboard({
             onClick={() => setActiveTab('panel')}
             style={activeTab === 'panel' ? { borderColor: '#1d4ed8', color: '#1d4ed8', backgroundColor: '#eff6ff' } : {}}
           >
-            Mi panel
+            {t.myPanel}
           </SecondaryButton>
           <SecondaryButton
             onClick={() => setActiveTab('ranking50')}
