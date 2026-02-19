@@ -54,10 +54,7 @@ function SwimmerDashboard({
   const t = labels[language] || labels.en;
 
   const swimmerTimes = useMemo(
-    () =>
-      times
-        .map((entry, index) => ({ ...entry, index }))
-        .filter((entry) => entry.swimmerEmail === currentUser.email),
+    () => times.filter((entry) => entry.swimmerEmail === currentUser.email),
     [times, currentUser.email],
   );
 
@@ -339,7 +336,7 @@ function SwimmerDashboard({
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.55rem' }}>
                 {swimmerTimes.map((entry) => (
                   <li
-                    key={`${entry.swimmerEmail}-${entry.index}-${entry.style}-${entry.distance}-${entry.time}`}
+                    key={entry.id}
                     style={{
                       border: '1px solid #e2e8f0',
                       borderRadius: '12px',
@@ -359,7 +356,7 @@ function SwimmerDashboard({
                       </div>
                       <button
                         type="button"
-                        onClick={() => removeTime(entry.index)}
+                        onClick={() => removeTime(entry.id)}
                         style={{
                           border: 'none',
                           backgroundColor: '#fee2e2',

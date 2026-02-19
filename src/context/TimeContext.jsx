@@ -6,6 +6,16 @@ const TIMES_KEY = 'swimmerTimes';
 const MESSAGES_KEY = 'messages';
 const ALERTS_KEY = 'improvementAlerts';
 
+
+function generateId(prefix = 'id') {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function ensureEntryIds(entries) {
+  if (!Array.isArray(entries)) return [];
+  return entries.map((entry) => (entry?.id ? entry : { ...entry, id: generateId('time') }));
+}
+
 function parseTimeToMs(timeValue) {
   const match = timeValue.trim().match(/^(\d+):(\d{2})(?:\.(\d{1,2}))?$/);
   if (!match) return null;
@@ -70,19 +80,16 @@ function calculateLinearPrediction(entries) {
 }
 
 export function TimeProvider({ children }) {
-  const [times, setTimes] = useState(() => readStoredJson(TIMES_KEY, []));
+  const [times, setTimes] = useState(() => ensureEntryIds(readStoredJson(TIMES_KEY, [])));
   const [messages, setMessages] = useState(() => readStoredJson(MESSAGES_KEY, []));
   const [alerts, setAlerts] = useState(() => readStoredJson(ALERTS_KEY, []));
-
 
   useEffect(() => {
     localStorage.setItem(TIMES_KEY, JSON.stringify(times));
   }, [times]);
-
   useEffect(() => {
     localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
   }, [messages]);
-
   useEffect(() => {
     localStorage.setItem(ALERTS_KEY, JSON.stringify(alerts));
   }, [alerts]);
@@ -102,6 +109,7 @@ export function TimeProvider({ children }) {
     const achievedReference = typeof reference === 'number' ? timeInMs <= reference : false;
 
     const entry = {
+      id: generateId('time'),
       style,
       distance,
       time,
@@ -123,7 +131,7 @@ export function TimeProvider({ children }) {
     if (previousBest && timeInMs < previousBest.timeInMs) {
       const improvementMs = previousBest.timeInMs - timeInMs;
       const alert = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        id: generateId('alert'),
         swimmerEmail: currentUser.email,
         type: 'improvement',
         event: `${style} ${distance}m`,
@@ -138,8 +146,9 @@ export function TimeProvider({ children }) {
     return { success: true };
   };
 
-  const removeTime = (timeIndex) => {
-    setTimes((prev) => prev.filter((_, index) => index !== timeIndex));
+  const removeTime = (timeId) => {
+    if (!timeId) return;
+    setTimes((prev) => prev.filter((entry) => entry.id !== timeId));
   };
 
   const sendMessage = (to, text) => {
@@ -149,7 +158,7 @@ export function TimeProvider({ children }) {
     }
 
     const message = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      id: generateId('message'),
       from: 'coach',
       to,
       text: normalizedText,
