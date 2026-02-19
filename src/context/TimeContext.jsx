@@ -8,12 +8,16 @@ const ALERTS_KEY = 'improvementAlerts';
 
 
 function generateId(prefix = 'id') {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `${prefix}-${crypto.randomUUID()}`;
+  }
+
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function ensureEntryIds(entries) {
-  if (!Array.isArray(entries)) return [];
-  return entries.map((entry) => (entry?.id ? entry : { ...entry, id: generateId('time') }));
+function ensureRecordIds(records, prefix) {
+  if (!Array.isArray(records)) return [];
+  return records.map((record) => (record?.id ? record : { ...record, id: generateId(prefix) }));
 }
 
 function parseTimeToMs(timeValue) {
@@ -80,9 +84,9 @@ function calculateLinearPrediction(entries) {
 }
 
 export function TimeProvider({ children }) {
-  const [times, setTimes] = useState(() => ensureEntryIds(readStoredJson(TIMES_KEY, [])));
-  const [messages, setMessages] = useState(() => readStoredJson(MESSAGES_KEY, []));
-  const [alerts, setAlerts] = useState(() => readStoredJson(ALERTS_KEY, []));
+  const [times, setTimes] = useState(() => ensureRecordIds(readStoredJson(TIMES_KEY, []), 'time'));
+  const [messages, setMessages] = useState(() => ensureRecordIds(readStoredJson(MESSAGES_KEY, []), 'message'));
+  const [alerts, setAlerts] = useState(() => ensureRecordIds(readStoredJson(ALERTS_KEY, []), 'alert'));
 
   useEffect(() => {
     localStorage.setItem(TIMES_KEY, JSON.stringify(times));
